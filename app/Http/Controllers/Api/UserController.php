@@ -28,6 +28,8 @@ class UserController extends Controller
                 ], 401);
             }
 
+            $validated = $validateUser->validated();
+
             $validated = $validateUser ->validated();
 
             $map=[];
@@ -36,17 +38,29 @@ class UserController extends Controller
 
             $user - User::where($map) -> first();
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
+            if (empty($user->id)) {
+                $validated['token'] = md5(uniqid().rand(1000, 99999));
+                $validated['created_at'] =Carbon::now();
+                $userID = User::insertGetId($validated);
+                $userInfo = User::where('id', '=', $userID);
+                $accessToken = $userInfo->createToken(uniqid())->plainText;
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User Created Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken,
-            ], 200);
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                ]);
+            }
+            $accessToken = $userInfo->createToken(uniqid())->plainTextToken;
+            $userInfo->access_token = $accessToken;
+    
+                return response()->json([
+                    'status' => true,
+                    'message' => 'User Created Successfully',
+                    'token' => $userInfo
+                ], 200);
+                
+            
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
