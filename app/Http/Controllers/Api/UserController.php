@@ -43,12 +43,15 @@ class UserController extends Controller
                 $validated['token'] = md5(uniqid() . rand(1000, 99999));
                 $validated['created_at'] = Carbon::now();
                 $validated['password'] = Hash::make($validated['password']);
-
+                $validated['password'],
+                $userId = User::inserGetId($validated);
+                $userInfo = User::where('id', '=', $userID)->first();
                 $user = User::create($validated);
             }
 
             $accessToken = $user->createToken(uniqid())->plainTextToken;
             $user->access_token = $accessToken;
+            User::where('id', '=', $userID)->update(['access_token'=>$accessToken]);
 
             return response()->json([
                 'status' => true,
