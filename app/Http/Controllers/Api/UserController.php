@@ -13,6 +13,7 @@ class UserController extends Controller
 {
     public function createUser(Request $request)
     {
+     
         try {
             $validateUser = Validator::make($request->all(), [
                 'avatar' => 'required',
@@ -38,12 +39,17 @@ class UserController extends Controller
             $map['open_id'] = $validated['open_id'];
 
             $user = User::where($map)->first();
+            return response()->json([
+                'status'=>true,
+                'data'=>$validated,
+                'message'=>'passed validation',
+            ], 200);
 
             if (empty($user)) {
                 $validated['token'] = md5(uniqid() . rand(1000, 99999));
                 $validated['created_at'] = Carbon::now();
                 $validated['password'] = Hash::make($validated['password']);
-                $validated['password'],
+                $validated['password'];
                 $userId = User::inserGetId($validated);
                 $userInfo = User::where('id', '=', $userID)->first();
                 $user = User::create($validated);
@@ -54,7 +60,7 @@ class UserController extends Controller
             User::where('id', '=', $userID)->update(['access_token'=>$accessToken]);
 
             return response()->json([
-                'status' => true,
+                'status' => 200, 
                 'message' => 'User Created Successfully',
                 'token' => $accessToken,
                 'user' => $user
