@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CourseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,11 +15,9 @@ use App\Http\Controllers\Api\LoginController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::group(['namespace'=> 'Api'], function(){
-    Route::post('/login',[UserController::class, 'createUser']);
-    Route::group(['middleware'=>['auth:sanctum']], function () 
-    {
-     Route::any('/courseList', [CourseController::class , 'courseList']);  
-    })
-});
 
+Route::post('/login', [UserController::class, 'createUser']);
+
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::any('/courseList', [CourseController::class, 'courseList']);
+});
